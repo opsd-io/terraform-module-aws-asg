@@ -1,23 +1,7 @@
-#
-# Launch template
-#
-
-variable "create_launch_template" {
-  description = "If true, creates a launch template."
-  type        = bool
-  default     = true
-}
-
 variable "launch_template_name" {
   description = "The name of the launch template."
   type        = string
   default     = ""
-}
-
-variable "launch_template_description" {
-  description = "Description of the launch template."
-  type        = string
-  default     = null
 }
 
 variable "launch_template_version" {
@@ -25,75 +9,6 @@ variable "launch_template_version" {
   type        = string
   default     = "$Default"
 }
-
-variable "image_id" {
-  description = "The Name of the AMI."
-  type        = string
-}
-
-variable "key_name" {
-  description = "The Name of ssh public key to add to ec2-user account."
-  type        = string
-}
-
-variable "iam_instance_profile" {
-  description = "The IAM Instance Profile to launch the instance with."
-  type        = map(string)
-}
-
-variable "network_interfaces" {
-  description = "A list of network interfaces to be attached to the instance."
-  type        = list(any)
-  default     = []
-}
-
-variable "vpc_security_group_ids" {
-  description = "A list of security group IDs to assign to."
-  type        = list(string)
-  default     = []
-}
-
-variable "ebs_optimized" {
-  description = "If true, used EC2 instance will be EBS-optimized"
-  type        = bool
-  default     = false
-}
-
-variable "instance_type" {
-  description = "The type of the instance."
-  type        = string
-  default     = null
-}
-
-variable "metadata_options" {
-  description = "Customize the metadata options for the instance."
-  type        = map(string)
-  default = {
-    instance_metadata_tags = "enabled"
-  }
-}
-
-variable "user_data" {
-  description = "The user data to pass to the instance at launch time."
-  type        = any
-  default     = null
-}
-
-variable "launch_template_tag_specifications" {
-  description = "Tags being added to EC2, volume and network interface."
-  type        = map(string)
-  default     = {}
-}
-
-variable "launch_template_tags" {
-  description = "A map of tags to assign to the launch template."
-  type        = map(string)
-  default     = {}
-}
-
-#
-# Auto Scaling Group
-#
 
 variable "name" {
   description = "The name of the Auto Scaling Group."
@@ -138,22 +53,56 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "use_mixed_instances_policy" {
-  description = "Controls the usage of mixed_instances_policy."
-  type        = bool
-  default     = true
+variable "mixed_instances_distribution" {
+  description = "Mixed instances policy distribution configuration structure."
+  type = object({
+    on_demand_allocation_strategy            = optional(string)
+    on_demand_base_capacity                  = optional(string)
+    on_demand_percentage_above_base_capacity = optional(string)
+    spot_allocation_strategy                 = optional(string)
+    spot_instance_pools                      = optional(string)
+    spot_max_price                           = optional(string)
+  })
 }
 
-variable "mixed_instances_policy" {
-  description = "Configuration structure used to launch multiple instance types, On-Demand and Spots within a single ASG."
-  type        = any
-  default     = null
+variable "mixed_instances_overrides" {
+  description = "Mixed instances policy overrides structure."
+  type = list(object({
+    instance_requirements = optional(
+      object({
+        burstable_performance   = optional(string)
+        cpu_manufacturers       = optional(set(string))
+        excluded_instance_types = optional(set(string))
+        instance_generations    = optional(set(string))
+
+        vcpu_count_max          = optional(number)
+        vcpu_count_min          = optional(number)
+        memory_gib_per_vcpu_max = optional(number)
+        memory_gib_per_vcpu_min = optional(number)
+        memory_mib_max          = optional(number)
+        memory_mib_min          = optional(number)
+
+        on_demand_max_price_percentage_over_lowest_price = optional(number)
+        spot_max_price_percentage_over_lowest_price      = optional(number)
+      })
+    )
+
+    instance_type     = optional(string)
+    weighted_capacity = optional(number)
+
+    launch_template_specification = optional(object({
+      launch_template_id   = optional(string)
+      launch_template_name = optional(string)
+    }))
+
+  }))
+  default = []
 }
 
 variable "capacity_rebalance" {
   description = "Whether capacity rebalance is enabled."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "default_instance_warmup" {
@@ -188,18 +137,38 @@ variable "default_cooldown" {
 
 variable "schedules" {
   description = "A map of the ASG schedules."
-  type        = map(any)
-  default     = {}
+  type = map(object({
+    min_size         = optional(number)
+    max_size         = optional(number)
+    desired_capacity = optional(number)
+    start_time       = optional(string)
+    end_time         = optional(string)
+    time_zone        = optional(string)
+    recurrence       = optional(string)
+  }))
+  default = {}
 }
 
 variable "initial_lifecycle_hooks" {
   description = "A map of lifecycle hooks executed during an instance startup."
-  type        = map(any)
-  default     = {}
+  type = map(object({
+    default_result          = optional(string, "CONTINUE")
+    heartbeat_timeout       = optional(number, 600)
+    notification_metadata   = optional(string)
+    notification_target_arn = optional(string)
+    role_arn                = optional(string)
+  }))
+  default = {}
 }
 
 variable "termination_lifecycle_hooks" {
   description = "A map of lifecycle hooks executed during an instance termination."
-  type        = map(any)
-  default     = {}
+  type = map(object({
+    default_result          = optional(string, "CONTINUE")
+    heartbeat_timeout       = optional(number, 600)
+    notification_metadata   = optional(string)
+    notification_target_arn = optional(string)
+    role_arn                = optional(string)
+  }))
+  default = {}
 }

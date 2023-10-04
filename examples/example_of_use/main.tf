@@ -20,9 +20,9 @@ module "asg" {
   iam_instance_profile   = local.ec2_iam_instance_profile
   launch_template_tag_specifications     = { Name = "fresh-asg", Env = "prd" }
 
-  mixed_instances_policy = {
+  # mixed_instances_policy = {
 
-    instances_distribution = {
+    mixed_instances_distribution = {
       on_demand_allocation_strategy            = "prioritized",
       on_demand_base_capacity                  = 0,
       on_demand_percentage_above_base_capacity = 0,
@@ -65,7 +65,7 @@ module "asg" {
         instance_type = "m5a.xlarge"
       },
     ]
-  }
+  # }
 
   asg_tags = {
     Name  = "fresh-asg",
