@@ -18,6 +18,7 @@ variable "name" {
 variable "desired_capacity" {
   description = "A number of Amazon EC2 instances in the group."
   type        = number
+  default     = 0
 }
 
 variable "min_size" {
@@ -56,12 +57,12 @@ variable "tags" {
 variable "mixed_instances_distribution" {
   description = "Mixed instances policy distribution configuration structure."
   type = object({
-    on_demand_allocation_strategy            = optional(string)
-    on_demand_base_capacity                  = optional(string)
-    on_demand_percentage_above_base_capacity = optional(string)
-    spot_allocation_strategy                 = optional(string)
-    spot_instance_pools                      = optional(string)
-    spot_max_price                           = optional(string)
+    on_demand_allocation_strategy            = optional(string, "prioritized")
+    on_demand_base_capacity                  = optional(number, 0)
+    on_demand_percentage_above_base_capacity = optional(number, 0)
+    spot_allocation_strategy                 = optional(string, "capacity-optimized")
+    spot_instance_pools                      = optional(number)
+    spot_max_price                           = optional(number)
   })
 }
 
@@ -75,12 +76,20 @@ variable "mixed_instances_overrides" {
         excluded_instance_types = optional(set(string))
         instance_generations    = optional(set(string))
 
-        vcpu_count_max          = optional(number)
-        vcpu_count_min          = optional(number)
-        memory_gib_per_vcpu_max = optional(number)
-        memory_gib_per_vcpu_min = optional(number)
-        memory_mib_max          = optional(number)
-        memory_mib_min          = optional(number)
+        vcpu_count = optional(object({
+          max = number
+          min = number
+        }))
+
+        memory_gib_per_vcpu = optional(object({
+          max = number
+          min = number
+        }))
+
+        memory_mib = optional(object({
+          max = number
+          min = number
+        }))
 
         on_demand_max_price_percentage_over_lowest_price = optional(number)
         spot_max_price_percentage_over_lowest_price      = optional(number)
@@ -108,7 +117,13 @@ variable "capacity_rebalance" {
 variable "default_instance_warmup" {
   description = "Time, in seconds, until a newly launched instance can contribute to the Amazon CloudWatch metrics."
   type        = number
-  default     = null
+  default     = 60
+}
+
+variable "ignore_failed_scaling_activities" {
+  description = "Whether to ignore failed Auto Scaling scaling activities while waiting for capacity."
+  type        = bool
+  default     = false
 }
 
 variable "termination_policies" {

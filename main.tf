@@ -9,7 +9,7 @@ resource "aws_autoscaling_group" "main" {
   health_check_grace_period        = var.health_check_grace_period
   wait_for_capacity_timeout        = var.wait_for_capacity_timeout
   default_instance_warmup          = var.default_instance_warmup
-  ignore_failed_scaling_activities = null
+  ignore_failed_scaling_activities = var.ignore_failed_scaling_activities
   termination_policies             = var.termination_policies
   enabled_metrics                  = var.enabled_metrics
   vpc_zone_identifier              = var.vpc_zone_identifier
@@ -50,19 +50,28 @@ resource "aws_autoscaling_group" "main" {
               excluded_instance_types = instance_requirements.value.excluded_instance_types
               instance_generations    = instance_requirements.value.instance_generations
 
-              vcpu_count {
-                max = instance_requirements.value.vcpu_count_max
-                min = instance_requirements.value.vcpu_count_min
+              dynamic "vcpu_count" {
+                for_each = instance_requirements.value.vcpu_count != null ? [instance_requirements.value.vcpu_count] : []
+                content {
+                  max = instance_requirements.value.vcpu_count.max
+                  min = instance_requirements.value.vcpu_count.min
+                }
               }
 
-              memory_gib_per_vcpu {
-                max = instance_requirements.value.memory_gib_per_vcpu_max
-                min = instance_requirements.value.memory_gib_per_vcpu_min
+              dynamic "memory_gib_per_vcpu" {
+                for_each = instance_requirements.value.memory_gib_per_vcpu != null ? [instance_requirements.value.memory_gib_per_vcpu] : []
+                content {
+                  max = instance_requirements.value.memory_gib_per_vcpu.max
+                  min = instance_requirements.value.memory_gib_per_vcpu.min
+                }
               }
 
-              memory_mib {
-                max = instance_requirements.value.memory_mib_max
-                min = instance_requirements.value.memory_mib_min
+              dynamic "memory_mib" {
+                for_each = instance_requirements.value.memory_mib != null ? [instance_requirements.value.memory_mib] : []
+                content {
+                  max = instance_requirements.value.memory_mib.max
+                  min = instance_requirements.value.memory_mib.min
+                }
               }
 
               on_demand_max_price_percentage_over_lowest_price = instance_requirements.value.on_demand_max_price_percentage_over_lowest_price
@@ -134,6 +143,6 @@ resource "aws_autoscaling_lifecycle_hook" "terminate" {
   heartbeat_timeout       = each.value.heartbeat_timeout
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_TERMINATING"
   notification_metadata   = each.value.notification_metadata
-  notification_target_arn = each.value.notification_target
+  notification_target_arn = each.value.notification_target_arn
   role_arn                = each.value.role_arn
 }
