@@ -78,7 +78,10 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_arn"></a> [arn](#output\_arn) | Amazon Resource Name (ARN) of the Auto Scaling Group. |
+| <a name="output_id"></a> [id](#output\_id) | The ID of the Auto Scaling Group. |
 <!-- END_TF_DOCS -->
 
 ## Examples of usage
