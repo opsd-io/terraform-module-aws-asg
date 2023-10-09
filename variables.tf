@@ -66,36 +66,9 @@ variable "mixed_instances_distribution" {
   })
 }
 
-variable "mixed_instances_overrides" {
+variable "single_instance_overrides" {
   description = "Mixed instances policy overrides structure."
   type = list(object({
-    instance_requirements = optional(
-      object({
-        burstable_performance   = optional(string)
-        cpu_manufacturers       = optional(set(string))
-        excluded_instance_types = optional(set(string))
-        instance_generations    = optional(set(string))
-
-        vcpu_count = optional(object({
-          max = number
-          min = number
-        }))
-
-        memory_gib_per_vcpu = optional(object({
-          max = number
-          min = number
-        }))
-
-        memory_mib = optional(object({
-          max = number
-          min = number
-        }))
-
-        on_demand_max_price_percentage_over_lowest_price = optional(number)
-        spot_max_price_percentage_over_lowest_price      = optional(number)
-      })
-    )
-
     instance_type     = optional(string)
     weighted_capacity = optional(number)
 
@@ -107,6 +80,36 @@ variable "mixed_instances_overrides" {
   }))
   default = []
 }
+
+variable "instance_requirements_override" {
+  description = "Override the instance type in the Launch Template with instance types that satisfy the requirements."
+  type = object({
+    burstable_performance   = optional(string)
+    cpu_manufacturers       = optional(set(string))
+    excluded_instance_types = optional(set(string))
+    instance_generations    = optional(set(string))
+
+    vcpu_count = optional(object({
+      max = number
+      min = number
+    }))
+
+    memory_gib_per_vcpu = optional(object({
+      max = number
+      min = number
+    }))
+
+    memory_mib = optional(object({
+      max = number
+      min = number
+    }))
+
+    on_demand_max_price_percentage_over_lowest_price = optional(number)
+    spot_max_price_percentage_over_lowest_price      = optional(number)
+  })
+  default = {}
+}
+
 
 variable "capacity_rebalance" {
   description = "Whether capacity rebalance is enabled."

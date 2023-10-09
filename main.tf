@@ -32,7 +32,7 @@ resource "aws_autoscaling_group" "main" {
       }
 
       dynamic "override" {
-        for_each = var.mixed_instances_overrides
+        for_each = var.single_instance_overrides
 
         content {
           dynamic "launch_template_specification" {
@@ -42,45 +42,47 @@ resource "aws_autoscaling_group" "main" {
             }
           }
 
-          dynamic "instance_requirements" {
-            for_each = override.value.instance_requirements != null ? [override.value.instance_requirements] : []
-            content {
-              burstable_performance   = instance_requirements.value.burstable_performance
-              cpu_manufacturers       = instance_requirements.value.cpu_manufacturers
-              excluded_instance_types = instance_requirements.value.excluded_instance_types
-              instance_generations    = instance_requirements.value.instance_generations
-
-              dynamic "vcpu_count" {
-                for_each = instance_requirements.value.vcpu_count != null ? [instance_requirements.value.vcpu_count] : []
-                content {
-                  max = instance_requirements.value.vcpu_count.max
-                  min = instance_requirements.value.vcpu_count.min
-                }
-              }
-
-              dynamic "memory_gib_per_vcpu" {
-                for_each = instance_requirements.value.memory_gib_per_vcpu != null ? [instance_requirements.value.memory_gib_per_vcpu] : []
-                content {
-                  max = instance_requirements.value.memory_gib_per_vcpu.max
-                  min = instance_requirements.value.memory_gib_per_vcpu.min
-                }
-              }
-
-              dynamic "memory_mib" {
-                for_each = instance_requirements.value.memory_mib != null ? [instance_requirements.value.memory_mib] : []
-                content {
-                  max = instance_requirements.value.memory_mib.max
-                  min = instance_requirements.value.memory_mib.min
-                }
-              }
-
-              on_demand_max_price_percentage_over_lowest_price = instance_requirements.value.on_demand_max_price_percentage_over_lowest_price
-              spot_max_price_percentage_over_lowest_price      = instance_requirements.value.spot_max_price_percentage_over_lowest_price
-            }
-          }
-
           instance_type     = override.value.instance_type
           weighted_capacity = override.value.weighted_capacity
+        }
+      }
+
+      dynamic "override" {
+        for_each = var.instance_requirements_override != null ? [var.instance_requirements_override] : []
+        content {
+          instance_requirements {
+            burstable_performance   = override.value.burstable_performance
+            cpu_manufacturers       = override.value.cpu_manufacturers
+            excluded_instance_types = override.value.excluded_instance_types
+            instance_generations    = override.value.instance_generations
+
+            dynamic "vcpu_count" {
+              for_each = override.value.vcpu_count != null ? [override.value.vcpu_count] : []
+              content {
+                max = override.value.vcpu_count.max
+                min = override.value.vcpu_count.min
+              }
+            }
+
+            dynamic "memory_gib_per_vcpu" {
+              for_each = override.value.memory_gib_per_vcpu != null ? [override.value.memory_gib_per_vcpu] : []
+              content {
+                max = override.value.memory_gib_per_vcpu.max
+                min = override.value.memory_gib_per_vcpu.min
+              }
+            }
+
+            dynamic "memory_mib" {
+              for_each = override.value.memory_mib != null ? [override.value.memory_mib] : []
+              content {
+                max = override.value.memory_mib.max
+                min = override.value.memory_mib.min
+              }
+            }
+
+            on_demand_max_price_percentage_over_lowest_price = override.value.on_demand_max_price_percentage_over_lowest_price
+            spot_max_price_percentage_over_lowest_price      = override.value.spot_max_price_percentage_over_lowest_price
+          }
         }
       }
     }
