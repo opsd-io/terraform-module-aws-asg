@@ -21,33 +21,11 @@ module "asg" {
     spot_max_price           = 0.06
   }
 
-  mixed_instances_overrides = [
-    {
-      instance_type = "m7a.xlarge"
-    },
-    {
-      instance_type                 = "c7g.xlarge"
-      launch_template_specification = { launch_template_name = module.launch_template_arm64.name }
-    },
-    {
-      instance_type = "c6a.xlarge"
-    },
-    {
-      instance_type                 = "m7g.xlarge"
-      launch_template_specification = { launch_template_name = module.launch_template_arm64.name }
-    },
-    {
-      instance_type = "m6a.xlarge"
-    },
-    {
-      instance_type                 = "r7g.xlarge"
-      launch_template_specification = { launch_template_name = module.launch_template_arm64.name }
-    },
-    {
-      instance_type = "m5zn.xlarge"
-    },
-  ]
-
+  instance_requirements_override = {
+    instance_generations = ["current"]
+    vcpu_count           = { min = 2, max = 4 }
+    memory_mib           = { min = 2048, max = 8192 }
+  }
 
   tags = {
     Name  = local.name,

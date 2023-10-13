@@ -2,11 +2,11 @@
 
 Meet **OPSd**. The unique and effortless way of managing cloud infrastructure.
 
-# terraform-module-template
+# terraform-module-aws-asg
 
 ## Introduction
 
-What does the module provide?
+Terraform module which creates Auto Scaling resources on AWS
 
 ## Usage
 
@@ -21,6 +21,11 @@ module "module_name" {
 ```
 
 **IMPORTANT**: Make sure not to pin to master because there may be breaking changes between releases.
+
+### Instance type overrides
+
+Is it possible to define specific instance types by `var.single_instance_overrides` or an instance requirements by `var.instance_requirements_override`.  
+These variables are mutually exclusive.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
