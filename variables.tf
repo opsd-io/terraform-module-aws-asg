@@ -1,11 +1,10 @@
 variable "launch_template_name" {
   description = "The name of the launch template."
   type        = string
-  default     = ""
 }
 
 variable "launch_template_version" {
-  description = "A version of the launch template"
+  description = "A version of the launch template."
   type        = string
   default     = "$Default"
 }
