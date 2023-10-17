@@ -11,12 +11,33 @@ Terraform module which creates Auto Scaling resources on AWS
 ## Usage
 
 ```hcl
-module "module_name" {
-  source  = "github.com/opsd-io/module_name?ref=v0.0.1"
+module "asg" {
+  source   = "../modules/terraform-module-aws-asg"
+  name     = "myASG"
+  min_size = 3
+  max_size = 9
 
-  # Variables
-  variable_1 = "foo"
-  variable_2 = "bar"
+  launch_template_name        = module.launch_template_amd64.name
+  vpc_zone_identifier         = ["subnet-069e5a2ff8aagfdsr"]
+  default_cooldown            = 60
+
+  mixed_instances_distribution = {
+    spot_allocation_strategy = "lowest-price"
+    spot_instance_pools      = 2,
+    spot_max_price           = 0.4
+  }
+
+  instance_requirements_override = {
+    instance_generations = ["current"]
+    vcpu_count           = { min = 2, max = 4 }
+    memory_mib           = { min = 2048, max = 8192 }
+  }
+
+  tags = {
+    Name  = local.name,
+    Env   = "prd",
+    Group = local.name
+  }
 }
 ```
 
