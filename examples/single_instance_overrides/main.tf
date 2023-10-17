@@ -1,6 +1,28 @@
 locals {
   name = "fresh-asg"
+  asg_enabled_metrics = [
+    "GroupAndWarmPoolDesiredCapacity",
+    "GroupAndWarmPoolTotalCapacity",
+    "GroupDesiredCapacity",
+    "GroupInServiceCapacity",
+  ]
+  termination_lifecycle_hooks = {
+    graceful_shutdown = {
+      heartbeat_timeout = 30,
+    }
+  }
   tags = { Name = "fresh-asg", Env = "prd" }
+}
+
+module "launch_template_amd64" {
+  source = "../modules/terraform-module-aws-launch-template"
+
+  name                   = "${local.name}-amd64"
+  image_id               = "ami-0a0956a3bacfbf256"
+  vpc_security_group_ids = ["sg-09d49e22dafd43ec5", "sg-0ea844093e906d77d"]
+  key_name               = "myKey"
+  iam_instance_profile   = "myEC2Profile"
+  tags                   = local.tags
 }
 
 module "asg" {
